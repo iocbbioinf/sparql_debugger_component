@@ -1,0 +1,148 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# dotenv environment variables file
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+/coverage
+
+# Build output
+/build
+
+# Misc
+.DS_Store
+*.pem
+*.log
+
+# Local env files
+*.local
+
+# Editor directories and files
+/.idea
+/.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# MacOS specific files
+.DS_Store
+
+# Windows specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux specific files
+.Trash-*
+
+# Optional npm cache directory
+.npm
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache
+.cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Comment out if using "serverless" function
+.netlify/functions/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# IDE and editor directories and files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Generated build files
+/build
+
+# SASS cache
+.sass-cache
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Log files
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Dependency directories
+node_modules/
+
+# Build directories
+dist/
+build/
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Output of 'npm pack'
+*.tgz
+
+# Optional cache directory for npm
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Output of 'npm outdated' command
+npm-debug.log*
+yarn-debug.log*
+
+# Parcel-bundler cache (https://parceljs.org/)
+.cache
+
+# SvelteKit build directory
+/.svelte-kit
+
+# static files for the static site
+/static
+
+# Hugo temporary build files
+/public/
+
+# Generated IDE files
+/.idea/
+
+# Serverless directories
+.serverless/
+.serverless_cache/
