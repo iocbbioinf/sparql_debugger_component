@@ -1,1 +1,1 @@
-export { default as DebugTreeView } from './DebugTreeView';
+export { default as SparqlDebugger } from './SparqlDebugger';

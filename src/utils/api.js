@@ -1,16 +1,17 @@
 import axios from "axios";
+import {PENDING_STATE, baseUrl} from "./constants"
 
-const baseUrl = "http://idsm-debugger-test6.dyn.cloud.e-infra.cz";
 
 let eventSource = null;
 
-export const subscribeToUpdates = (params, setTreeData, setExpandedItems) => {
+export const subscribeToUpdates = (params, setTreeData, setRenderData, setExpandedItems, setQueryIsRunning) => {
   const encodedParams = Object.keys(params)
     .map((key) => {
       return `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`;
     })
     .join("&");
 
+    
   const fullUrl = `${baseUrl}/query?${encodedParams}`;
 
   console.log(fullUrl);
@@ -23,7 +24,20 @@ export const subscribeToUpdates = (params, setTreeData, setExpandedItems) => {
     setTreeData((prevState) =>
       refreshTree(prevState, JSON.parse(event.data), setExpandedItems)
     );
-  };
+
+    setTreeData((prevState) => {
+      if(prevState.root.data.state !== PENDING_STATE) {
+        setQueryIsRunning(false);
+      }
+      return prevState;
+    });
+
+    setTreeData((prevState) => {
+      setRenderData([refreshRenderTree(prevState)]);
+      return prevState;
+    });
+
+  };  
 
   eventSource.onerror = function (err) {
     console.error("EventSource failed:", err);
@@ -35,18 +49,6 @@ export const unsubscribe = () => {
   if (eventSource) {
     eventSource.close();
     eventSource = null;
-  }
-};
-
-export const fetchFileContent = async (queryId, callId, isRequest) => {
-  try {
-    const reqResp = isRequest ? "request" : "response";
-    const fullUrl = `${baseUrl}/query/${queryId}/call/${callId}/${reqResp}`;
-    const response = await axios.get(fullUrl);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching file content:", error);
-    return "File not found or could not be loaded.";
   }
 };
 
@@ -115,4 +117,21 @@ function refreshTree(treeData, newNode, setExpandedItems) {
     setExpandedItems((oldState) => [...oldState, newNode.nodeId.toString()]);
     return { root: { data: newNode } };
   }
+}
+
+function refreshRenderTree(treeData) {
+
+  if (!treeData || !Object.keys(treeData).length ) return [];
+
+  if (treeData.root) {
+    return refreshRenderTree(treeData.root)
+  }
+
+  const result = {
+    id: treeData.data.nodeId.toString(),
+    label: JSON.stringify(treeData.data),
+    children: treeData.children ? treeData.children.map((child) => refreshRenderTree(child)) : []
+  }
+
+  return result;
 }
