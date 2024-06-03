@@ -117,7 +117,7 @@ const StyledDoneRoundedIcon = styled(DoneRoundedIcon)({
               {nodeContent.state !== PENDING_STATE && <ReqRespIconButton queryId={nodeContent.queryId} nodeId={nodeContent.nodeId} isRequest={false} />}
               
               {nodeContent.duration && <Typography variant="body2" color="inherit" sx={{ fontWeight: 'inherit', flexGrow: 1 }}>
-                    {nodeContent.duration}
+                    {durationToString(nodeContent.duration)}
               </Typography>
               }
 
@@ -140,8 +140,11 @@ const StyledDoneRoundedIcon = styled(DoneRoundedIcon)({
     const [expandedItems, setExpandedItems] = useState([]);
 
     useImperativeHandle(ref, () => ({
-      handleExecuteQuery
+      handleExecuteQuery,
+      handleStopQuery
     }));
+
+
 
     const handleExpandedItemsChange = (event, itemIds) => {
       setExpandedItems(itemIds);
@@ -157,9 +160,16 @@ const StyledDoneRoundedIcon = styled(DoneRoundedIcon)({
       }
     
       subscribeToUpdates(params, setTreeData, setTreeRenderData, setExpandedItems, setQueryIsRunning);
+
+    }
     
+    const handleStopQuery = async () => {
+      unsubscribe();
+      setTreeData({});           
+      setExpandedItems([])
+      setTreeRenderData([]);
     };
-    
+
     return (
       <Box sx={{ minHeight: 180, flexGrow: 1, maxWidth: 400 }}>
         <RichTreeView
