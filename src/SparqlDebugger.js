@@ -18,7 +18,7 @@ import {
 import { TreeItem2Icon } from '@mui/x-tree-view/TreeItem2Icon';
 import { TreeItem2Provider } from '@mui/x-tree-view/TreeItem2Provider';
 import { unstable_useTreeItem2 as useTreeItem2 } from '@mui/x-tree-view/useTreeItem2';
-import { subscribeToUpdates, unsubscribe, durationToString } from './utils/api';
+import { subscribeToUpdates, unsubscribe, durationToString, deleteQuery, cancelQuery } from './utils/api';
 
 import { Button, Container, Box, Typography, AppBar, Toolbar, CssBaseline, Paper } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles'; 
@@ -141,7 +141,8 @@ const StyledDoneRoundedIcon = styled(DoneRoundedIcon)({
 
     useImperativeHandle(ref, () => ({
       handleExecuteQuery,
-      handleStopQuery
+      handleStopQuery,
+
     }));
 
 
@@ -151,19 +152,23 @@ const StyledDoneRoundedIcon = styled(DoneRoundedIcon)({
     };  
     
     const handleExecuteQuery = async () => {
-      unsubscribe();
-      setTreeData({});
-    
       const params = {
         endpoint: `${endpoint}`,
         query: `${query}`
       }
     
+      deleteQuery(treeData);
+      unsubscribe();
+      setTreeData({});           
+      setExpandedItems([])
+      setTreeRenderData([]);      
+
       subscribeToUpdates(params, setTreeData, setTreeRenderData, setExpandedItems, setQueryIsRunning);
 
     }
     
     const handleStopQuery = async () => {
+      cancelQuery(treeData);
       unsubscribe();
       setTreeData({});           
       setExpandedItems([])
