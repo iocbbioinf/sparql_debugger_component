@@ -2,6 +2,7 @@ import axios from "axios";
 import {PENDING_STATE, baseUrl} from "./constants"
 
 let eventSource = null;
+let queryId = null;
 
 export const subscribeToUpdates = (params, setTreeData, setRenderData, setExpandedItems, setQueryIsRunning) => {
   const encodedParams = Object.keys(params)
@@ -20,8 +21,11 @@ export const subscribeToUpdates = (params, setTreeData, setRenderData, setExpand
   eventSource.onmessage = function (event) {
     console.log("New event from server:", event.data);
 
+    const eventData = JSON.parse(event.data);
+    queryId = eventData.queryId;
+
     setTreeData((prevState) =>
-      refreshTree(prevState, JSON.parse(event.data), setExpandedItems)
+      refreshTree(prevState, eventData, setExpandedItems)
     );
 
     setTreeData((prevState) => {
@@ -135,20 +139,16 @@ function refreshRenderTree(treeData) {
   return result;
 }
 
-export const deleteQuery = (treeData) => {
-  if(treeData?.root?.data) {
-    const queryId = treeData.root.data.queryId;  
-    const fullUrl = `${baseUrl}/query/${queryId}/delete`;
-  
+export const deleteQuery = () => {
+  if(queryId) {
+    const fullUrl = `${baseUrl}/query/${queryId}/delete`;  
     axios.post(fullUrl);
   }
 }
 
-export const cancelQuery = (treeData) => {
-  if(treeData?.root?.data) {
-    const queryId = treeData.root.data.queryId;
-    const fullUrl = `${baseUrl}/query/${queryId}/cancel`;
-  
+export const cancelQuery = () => {
+  if(queryId) {
+    const fullUrl = `${baseUrl}/query/${queryId}/cancel`;  
     axios.post(fullUrl);
   }
 }

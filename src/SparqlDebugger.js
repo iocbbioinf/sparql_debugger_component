@@ -157,7 +157,7 @@ const StyledDoneRoundedIcon = styled(DoneRoundedIcon)({
         query: `${query}`
       }
     
-      deleteQuery(treeData);
+      deleteQuery();
       unsubscribe();
       setTreeData({});           
       setExpandedItems([])
@@ -168,7 +168,7 @@ const StyledDoneRoundedIcon = styled(DoneRoundedIcon)({
     }
     
     const handleStopQuery = async () => {
-      cancelQuery(treeData);
+      cancelQuery();
       unsubscribe();
       setTreeData({});           
       setExpandedItems([])
