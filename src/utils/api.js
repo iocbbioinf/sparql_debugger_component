@@ -1,5 +1,6 @@
 import axios from "axios";
-import {PENDING_STATE, baseUrl} from "./constants"
+import {PENDING_STATE, SUCCESS_STATE, FAILURE_STATE, baseUrl} from "./constants"
+import { v4 as uuidv4 } from "uuid";
 
 let eventSource = null;
 let queryId = null;
@@ -36,7 +37,7 @@ export const subscribeToUpdates = (params, setTreeData, setRenderData, setExpand
     });
 
     setTreeData((prevState) => {
-      setRenderData([refreshRenderTree(prevState)]);
+      setRenderData([refreshRenderTree(addBulkNodes(prevState))]);
       return prevState;
     });
 
@@ -122,18 +123,70 @@ function refreshTree(treeData, newNode, setExpandedItems) {
   }
 }
 
-function refreshRenderTree(treeData) {
+var groupBy = function(xs, key) {
+  return xs.reduce(function(rv, x) {
+    (rv[(x["data"])[key]] = rv[(x["data"])[key]] || []).push(x);
+    return rv;
+  }, {});
+};
 
+
+function addBulkNodes(treeData) {
   if (!treeData || !Object.keys(treeData).length ) return [];
 
   if (treeData.root) {
-    return refreshRenderTree(treeData.root)
+    return { root: addBulkNodes(treeData.root) };
+  }
+
+  if(treeData.children) {
+    const childGroup = groupBy(treeData.children, "serviceCallId");
+
+    const childMultiGroup = Object.values(childGroup).filter(x => x.length > 1);
+  
+    const bulkChildrenNodes = Object.values(childMultiGroup).map(x => {
+      var bulkState;
+      if(treeData.data.state != PENDING_STATE) {
+        if(x.every((child) => child.data.state == SUCCESS_STATE)) {
+          bulkState = SUCCESS_STATE;
+        } else {
+          bulkState = FAILURE_STATE;
+        }
+      } else {
+        bulkState = PENDING_STATE
+      }
+            
+      return {
+        data: {nodeId: uuidv4(), isBulk: true, bulkSize: x.length, endpoint: x[0].data.endpoint, state: bulkState}, 
+        children: x.map((child) => addBulkNodes(child))
+      }
+  })  
+  
+    const childSingleGroup = Object.values(childGroup).filter(x => x.length === 1).flat();
+    const singleChildrenNodes = Object.values(childSingleGroup).map((child) => addBulkNodes(child));
+  
+    const result = { 
+      data: { ...treeData.data },
+      children: bulkChildrenNodes.concat(singleChildrenNodes)
+    }  
+    return result;
+
+  } else {
+    return treeData;
+  }
+
+}
+
+function refreshRenderTree(bulkTreeData) {
+  if (!bulkTreeData || !Object.keys(bulkTreeData).length ) return [];
+
+  if (bulkTreeData.root) {
+    return refreshRenderTree(bulkTreeData.root)
   }
 
   const result = {
-    id: treeData.data.nodeId.toString(),
-    label: JSON.stringify(treeData.data),
-    children: treeData.children ? treeData.children.map((child) => refreshRenderTree(child)) : []
+    id: bulkTreeData.data.nodeId.toString(),
+    label: JSON.stringify(bulkTreeData.data),
+    children: bulkTreeData.children ? bulkTreeData.children.map((child) => refreshRenderTree(child)) : []
   }
 
   return result;
