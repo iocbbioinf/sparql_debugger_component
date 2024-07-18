@@ -1,37 +1,86 @@
-import React, { useState } from 'react';
-import { IconButton, Tooltip, Modal, Box } from '@mui/material';
+import React, { useState, useCallback } from 'react';
+import { IconButton, Tooltip, Modal, Box, Button } from '@mui/material';
 import InputIcon from '@mui/icons-material/Input';
 import OutputIcon from '@mui/icons-material/Output';
-import JSONPretty from 'react-json-pretty';
+import { saveAs } from 'file-saver';
 import modalStyle from './styles/modalStyle'; 
+import { baseUrl } from "./utils/constants";
+import JSONPretty from 'react-json-pretty';
 
-import axios from "axios";
-import {baseUrl} from "./utils/constants"
 
 function ReqRespIconButton({ queryId, nodeId, isRequest }) {
   const [open, setOpen] = useState(false);
   const [fileContent, setFileContent] = useState('');
+  const [fileBlob, setFileBlob] = useState(null);
 
+  const PREVIEW_LENGTH = 2000;
 
-  const fetchFileContent = (queryId, callId, isRequest) => {
+  const fetchPreviewContent = useCallback(async (queryId, callId, isRequest) => {
+    const reqResp = isRequest ? "request" : "response";
+    const fullUrl = `${baseUrl}/query/${queryId}/call/${callId}/${reqResp}`;
+
+    try {
+      const response = await fetch(fullUrl, {
+        headers: {
+          'Accept-Encoding': 'gzip,deflate',
+          'Range': `bytes=0-${PREVIEW_LENGTH - 1}`
+        }
+      });
+
+      const blob = await response.blob();
+      
+      const text = await blob.text();
+
+      if(text.length >= PREVIEW_LENGTH - 1) {
+        setFileContent(text + "...");
+      } else {
+        setFileContent(text);
+      }
+
+    } catch (error) {
+      console.error("Error fetching file content:", error);
+      setFileContent("File not found or could not be loaded.");  
+    }
+  }, []);
+
+  const fetchFileContent = useCallback(async (queryId, callId, isRequest) => {
     try {
       const reqResp = isRequest ? "request" : "response";
       const fullUrl = `${baseUrl}/query/${queryId}/call/${callId}/${reqResp}`;
-      axios.get(fullUrl).then(response => {setFileContent(response.data)})
+
+      const response = await fetch(fullUrl, {
+        headers: {
+          'Accept-Encoding': 'gzip,deflate'
+        }
+      });
+      
+      const blob = await response.blob();
+
+      setFileBlob(blob);
+
+      const fileName = `${queryId}_${callId}_${reqResp}.tmp`;
+      saveAs(blob, fileName);
+
     } catch (error) {
       console.error("Error fetching file content:", error);
-      return "File not found or could not be loaded.";
     }
-  };
-  
-  const handleOpen =  (event) => {
-    fetchFileContent(queryId, nodeId, isRequest);
+  }, []);
+
+
+  const handleOpen = (event) => {
+    fetchPreviewContent(queryId, nodeId, isRequest);
     setOpen(true);
     event.stopPropagation();
   };
 
-  const handleClose = () => {
+  const handleClose = (event) => {
     setOpen(false);
+    event.stopPropagation();
+  };
+
+  const handleDownload = (event) => {
+    fetchFileContent(queryId, nodeId, isRequest);
+    event.stopPropagation();
   };
 
   const icon = isRequest ? <InputIcon /> : <OutputIcon />;
@@ -51,6 +100,9 @@ function ReqRespIconButton({ queryId, nodeId, isRequest }) {
         aria-describedby="modal-modal-description"
       >
         <Box sx={modalStyle}>
+          <Button onClick={handleDownload} variant="contained" color="primary" style={{ marginTop: '10px' }}>
+            Download
+          </Button>
           <JSONPretty id="json-pretty" data={fileContent} theme={JSONPretty.monikai}></JSONPretty>
         </Box>
       </Modal>
