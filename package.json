@@ -1,6 +1,6 @@
 {
   "name": "sparqldebugtree",
-  "version": "1.4.1",
+  "version": "1.4.4",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
@@ -32,11 +32,13 @@
     "@mui/material": "^5.15.19",
     "@mui/x-tree-view": "^7.5.0",
     "axios": "^1.7.0",
+    "css-loader": "^7.1.2",
     "file-saver": "^2.0.5",
     "npm": "^10.8.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-json-pretty": "^2.2.0",
+    "style-loader": "^4.0.0",
     "uuid": "^10.0.0"
   }
 }

@@ -1,0 +1,27 @@
+.fancy-button {
+    background: #000000 !important; /* Ensure the background is black */
+    color: #ffffff !important; /* Ensure the text color is white */
+    border: 1px solid #ffffff;
+    border-radius: 3px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .3);
+    height: 36px;
+    padding: 0 20px;
+    font-size: 14px;
+    text-transform: none;
+    margin-bottom: 20px;
+  }
+  
+  .modal-box {
+    padding: 20px; /* Add padding to the modal content */
+  }
+  
+  .modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .json-pretty {
+    margin-top: 20px; /* Add margin to separate from the button */
+    width: 100%; /* Ensure it takes full width */
+  }

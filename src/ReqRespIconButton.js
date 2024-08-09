@@ -6,9 +6,10 @@ import { saveAs } from 'file-saver';
 import modalStyle from './styles/modalStyle'; 
 import { baseUrl } from "./utils/constants";
 import JSONPretty from 'react-json-pretty';
+import DownloadIcon from '@mui/icons-material/Download';
+import './styles/debugStyles.css'; 
 
-
-function ReqRespIconButton({ queryId, nodeId, isRequest }) {
+function ReqRespIconButton({ queryId, nodeId, isRequest, resultType }) {
   const [open, setOpen] = useState(false);
   const [fileContent, setFileContent] = useState('');
   const [fileBlob, setFileBlob] = useState(null);
@@ -19,11 +20,13 @@ function ReqRespIconButton({ queryId, nodeId, isRequest }) {
     const reqResp = isRequest ? "request" : "response";
     const fullUrl = `${baseUrl}/query/${queryId}/call/${callId}/${reqResp}`;
 
+    const actualPreviewLength = resultType === "html" ? 200000 : PREVIEW_LENGTH;
+
     try {
       const response = await fetch(fullUrl, {
         headers: {
           'Accept-Encoding': 'gzip,deflate',
-          'Range': `bytes=0-${PREVIEW_LENGTH - 1}`
+          'Range': `bytes=0-${actualPreviewLength - 1}`
         }
       });
 
@@ -31,7 +34,7 @@ function ReqRespIconButton({ queryId, nodeId, isRequest }) {
       
       const text = await blob.text();
 
-      if(text.length >= PREVIEW_LENGTH - 1) {
+      if(text.length >= actualPreviewLength - 1) {
         setFileContent(text + "...");
       } else {
         setFileContent(text);
@@ -58,7 +61,8 @@ function ReqRespIconButton({ queryId, nodeId, isRequest }) {
 
       setFileBlob(blob);
 
-      const fileName = `${queryId}_${callId}_${reqResp}.tmp`;
+      const postfix = resultType ? resultType : "txt"
+      const fileName = `${queryId}_${callId}_${reqResp}.${postfix}`;
       saveAs(blob, fileName);
 
     } catch (error) {
@@ -99,11 +103,34 @@ function ReqRespIconButton({ queryId, nodeId, isRequest }) {
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box sx={modalStyle}>
-          <Button onClick={handleDownload} variant="contained" color="primary" style={{ marginTop: '10px' }}>
-            Download
-          </Button>
-          <JSONPretty id="json-pretty" data={fileContent} theme={JSONPretty.monikai}></JSONPretty>
+        <Box sx={modalStyle} className="modal-content">
+          <Button
+              onClick={handleDownload}
+              variant="contained"
+              startIcon={<DownloadIcon />}
+              className="fancy-button"
+            >
+              Download
+            </Button>
+
+            {resultType === "html" ? (
+            <div             
+              style={{
+                flex: 1, // Make the content take up remaining space
+                maxHeight: '70vh',
+                overflowY: 'auto',
+                overflowX: 'auto',
+                padding: '1rem', // Add padding for better spacing
+              }}
+
+              dangerouslySetInnerHTML={{ __html: fileContent }}
+              className="html-preview"              
+            />
+          ) : (
+            <JSONPretty id="json-pretty" data={fileContent} theme={JSONPretty.monikai} className="json-pretty"></JSONPretty>
+          )}
+
+          
         </Box>
       </Modal>
     </div>

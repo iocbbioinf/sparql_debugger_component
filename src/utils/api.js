@@ -1,5 +1,5 @@
 import axios from "axios";
-import {PENDING_STATE, SUCCESS_STATE, FAILURE_STATE, baseUrl} from "./constants"
+import {PENDING_STATE, SUCCESS_STATE, FAILURE_STATE, baseUrl, HTML_SUFFIX, XML_SUFFIX, JSON_SUFFIX, TEXT_SUFFIX} from "./constants"
 import { v4 as uuidv4 } from "uuid";
 
 let eventSource = null;
@@ -55,6 +55,7 @@ export const unsubscribe = () => {
     eventSource = null;
   }
 };
+
 
 export const durationToString = (durationInMillis) => {
   if (durationInMillis) {
@@ -125,6 +126,7 @@ function refreshTree(treeData, newNode, setExpandedItems) {
 
 var groupBy = function(xs, key) {
   return xs.reduce(function(rv, x) {
+
     (rv[(x["data"])[key]] = rv[(x["data"])[key]] || []).push(x);
     return rv;
   }, {});
@@ -154,9 +156,16 @@ function addBulkNodes(treeData) {
       } else {
         bulkState = PENDING_STATE
       }
+
+      const tmp1 = x.map(child => child.data.endTime);
+      const tmp2 = x.map(child => child.data.endTime).filter(time => time != null);
+      const tmp3 = Math.max(x.map(child => child.data.endTime).filter(time => time != null));
+      const tmp4 = Math.max(...x.map(child => child.data.startTime).filter(time => time != null));
+
+      const duration = Math.max(...x.map(child => child.data.endTime).filter(time => time != null)) - Math.min(...x.map(child => child.data.startTime).filter(time => time != null));
             
       return {
-        data: {nodeId: uuidv4(), isBulk: true, bulkSize: x.length, endpoint: x[0].data.endpoint, state: bulkState}, 
+        data: {nodeId: uuidv4(), isBulk: true, bulkSize: x.length, endpoint: x[0].data.endpoint, state: bulkState, duration: duration}, 
         children: x.map((child) => addBulkNodes(child))
       }
   })  

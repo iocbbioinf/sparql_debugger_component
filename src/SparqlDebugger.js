@@ -20,7 +20,7 @@ import { TreeItem2Provider } from '@mui/x-tree-view/TreeItem2Provider';
 import { unstable_useTreeItem2 as useTreeItem2 } from '@mui/x-tree-view/useTreeItem2';
 import { subscribeToUpdates, unsubscribe, durationToString, deleteQuery, cancelQuery } from './utils/api';
 
-import { Button, Container, Box, Typography, AppBar, Toolbar, CssBaseline, Paper } from '@mui/material';
+import { Button, Container, Box, Typography, Tooltip, CssBaseline } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles'; 
 
 import BugReportIcon from '@mui/icons-material/BugReport';
@@ -106,27 +106,72 @@ const StyledDoneRoundedIcon = styled(DoneRoundedIcon)({
             <TreeItem2IconContainer {...getIconContainerProps()}>
               <TreeItem2Icon status={status} />
             </TreeItem2IconContainer>
-            <Box sx={{ display: 'flex', alignItems: 'center', p: 0.5, pr: 0, backgroundColor: nodeContent.isBulk ? 'rgba(255, 165, 0, 0.2)' : 'transparent', borderRadius: '8px' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                p: 0.5,
+                pr: 0,
+                backgroundColor: nodeContent.isBulk ? 'rgba(255, 165, 0, 0.2)' : 'transparent',
+                borderRadius: '8px'
+              }}
+            >
               {getIconComponent()}
-              <Typography variant="body2" sx={{ ml: 1 }}>{nodeContent.httpStatus}</Typography>
-              <Typography variant="body2" sx={{ flexGrow: 1, ml: 1 }}>
-                <Link href={nodeContent.endpoint} target="_blank" rel="noopener noreferrer">{nodeContent.endpoint}</Link>
-              </Typography>
-              {nodeContent.isBulk && <Typography variant="body2" color="inherit" sx={{ fontWeight: 'inherit', pr: 4 }}>
-                  {nodeContent.bulkSize}x
-              </Typography>
-              }
-              {!nodeContent.isBulk && <ReqRespIconButton queryId={nodeContent.queryId} nodeId={nodeContent.nodeId} isRequest={true} />}
-              {!nodeContent.isBulk && nodeContent.state !== PENDING_STATE && <ReqRespIconButton queryId={nodeContent.queryId} nodeId={nodeContent.nodeId} isRequest={false} />}
-              
-              {nodeContent.duration && <Typography variant="body2" color="inherit" sx={{ fontWeight: 'inherit', flexGrow: 1, pr: 1 }}>
-                    {durationToString(nodeContent.duration)}
-              </Typography>
-              }
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  ml: 1,
+                  width: '100%',
+                }}
+              >
 
-              {nodeContent.responseItemCount && <Typography variant="body2" sx={{ ml: 1 }}>{nodeContent.responseItemCount}</Typography>}
+                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                  <Tooltip title="Service endpoint URL">
+                    <Typography variant="body2" sx={{ flexGrow: 1, ml: 1 }}>
+                      <Link href={nodeContent.endpoint} target="_blank" rel="noopener noreferrer">{nodeContent.endpoint}</Link>
+                    </Typography>
+                  </Tooltip>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                  <Tooltip title="Http status" arrow>
+                    <Typography variant="body2" sx={{ ml: 2 }}>{nodeContent.httpStatus}</Typography>
+                  </Tooltip>
+                  {nodeContent.isBulk && (
+                    <Tooltip title="Number of endpoint calls" arrow>
+                      <Typography variant="body2" color="inherit" sx={{ fontWeight: 'inherit', pr: 4 }}>
+                        {nodeContent.bulkSize}x
+                      </Typography>
+                    </Tooltip>
+                  )}
+                  {nodeContent.isBulk && (
+                    <Tooltip title="Duration" arrow>
+                      <Typography variant="body2" color="inherit" sx={{ fontWeight: 'inherit', pr: 4 }}>
+                        {durationToString(nodeContent.duration)}
+                      </Typography>
+                    </Tooltip>
+                  )}
+                  {!nodeContent.isBulk && <ReqRespIconButton queryId={nodeContent.queryId} nodeId={nodeContent.nodeId} isRequest={true} resultType={nodeContent.resultType}/>}
+                  {!nodeContent.isBulk && nodeContent.state !== PENDING_STATE && <ReqRespIconButton queryId={nodeContent.queryId} nodeId={nodeContent.nodeId} isRequest={false} resultType={nodeContent.resultType}/>}
+                  {nodeContent.endTime && (
+                    <Tooltip title="Duration" arrow>
+                      <Typography variant="body2" color="inherit" sx={{ fontWeight: 'inherit', pr: 1 }}>
+                        {durationToString(nodeContent.endTime - nodeContent.startTime)}
+                      </Typography>
+                    </Tooltip>
+                  )}
+
+                  {nodeContent.resultsCount && (
+                    <Tooltip title="Number of results" arrow>
+                      <Typography variant="body2" color="inherit" sx={{ fontWeight: 'inherit', pr: 1 }}>
+                        {nodeContent.resultsCount}
+                      </Typography>
+                    </Tooltip>
+                  )}
+
+                </Box>
+              </Box>
             </Box>
-
 
           </CustomTreeItemContent>
           {children && <TreeItem2GroupTransition {...getGroupTransitionProps()} />}
@@ -221,7 +266,10 @@ const SparqlDebugger = ({ theme, query, endpoint, updateQueryInfo }) => {
               startIcon={queryIsRunning ?  <CancelIcon /> : <BugReportIcon />}
             >
             {queryIsRunning ? 'Cancel' : 'Debug'}
-          </Button>
+          </Button>          
+          <Link href="https://gitlab.elixir-czech.cz/moos/idsm_debug_server/-/issues" target="_blank" rel="noopener noreferrer" style={{ marginLeft: 16 }}>
+          Report Debugging Issue
+          </Link>
         </Box>
         <DebugTreeView endpoint={endpoint} query={query} setQueryIsRunning={setQueryIsRunning} ref={debugTreeViewRef}/>
       </Container>
