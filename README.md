@@ -1,44 +1,33 @@
 # SPARQL Debugger
 
-**SPARQL Debugger** is a tool designed to trace the execution of federated SPARQL queries. It provides a visual representation of service executions in tree structures, displaying information about a service execution such as requests, responses, duration, and the number of results.
+**SPARQL Debugger** is a tool designed to trace the execution of federated SPARQL queries. It provides a visual representation of service executions in tree structures, displaying information such as requests, responses, duration, and the number of results for each service execution.
 
 The tool is divided into two main components:
-- **Server (this repository):** Handles the backend logic, including REST API and SSE messages.
-- **Frontend React Component:** Renders the service execution tree. You can find it [here](https://gitlab.elixir-czech.cz/moos/sparqldebugtree).
+- **Server:** Handles the backend logic, including REST API and SSE messages. You can find it [here](https://gitlab.elixir-czech.cz/moos/idsm_debug_server).
+- **Frontend React Component (this repository):** Renders the service execution tree.
 
-## REST API
+## Publishing as an NPM Library
 
-The server offers the following REST API endpoints:
+To publish this component as an NPM library:
 
-- `GET, POST /query/{queryId}/delete`: Delete a query debugging instance.
-- `GET /query/{queryId}/sse`: Stream real-time updates for the service execution tree via Server-Sent Events (SSE).
-- `GET /query/{queryId}/call/{callId}/request`: Retrieve the request details of a specific service execution call.
-- `GET /query/{queryId}/call/{callId}/response`: Retrieve the response details of a specific service execution call.
+1. In the `/package.json` file:
+   - Update the `version` attribute as needed.
+   
+2. Run the following command to build the library:
+   - `npm run build`
 
-## Build, Package, Run
+3. Publish the library using:
+   - `npm publish`
 
-This is a Spring Boot Web application built using Gradle. You can use the following Gradle tasks:
+## Using This Component in Your App
 
-- `build`: Compiles the project.
-- `jar`: Packages the application into a JAR file.
-- `bootRun`: Runs the application locally.
+To use this component in your application:
 
-## Deployment on the Cloud by Kubernetes
+1. Install the package:
+   - Run `npm install sparqldebugtree`
 
-### Docker Image
-To deploy the application, first build a Docker image using the Dockerfile located at `/docker/Dockerfile`.
+2. Configure the environment variable `REACT_APP_SERVER_URL`. For example, you can set it in a `.env` file.
 
-### Kubernetes Deployment
-Use the provided Kubernetes descriptors to deploy the application:
+## Demo Deployment
 
-1. **Deployment Descriptor:** `/kubernetes/idsmDebugger.deployment.yaml`
-    - This descriptor deploys the application as a Kubernetes Deployment and Service.
-    - **Required Edits:**
-        - Update the `container image` attribute.
-        - Set the `debugService` environment variable as needed.
-
-2. **Ingress Descriptor:** `/kubernetes/idsmDebugger.ingress.yaml`
-    - This descriptor creates a Kubernetes Ingress for the application.
-    - **Required Edits:**
-        - Update the `host` and `hosts` attributes.
-        - Modify the `nginx.ingress.kubernetes.io/cors-allow-origin` annotation.
+A demo deployment that is free to use is available [here](https://idsm-react-debugger-1.dyn.cloud.e-infra.cz).
