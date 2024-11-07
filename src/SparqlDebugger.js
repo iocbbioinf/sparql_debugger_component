@@ -18,7 +18,7 @@ import {
 import { TreeItem2Icon } from '@mui/x-tree-view/TreeItem2Icon';
 import { TreeItem2Provider } from '@mui/x-tree-view/TreeItem2Provider';
 import { unstable_useTreeItem2 as useTreeItem2 } from '@mui/x-tree-view/useTreeItem2';
-import { subscribeToUpdates, unsubscribe, durationToString, deleteQuery, cancelQuery } from './utils/api';
+import { subscribeToUpdates, unsubscribe, durationToString, deleteQuery } from './utils/api';
 
 import { Button, Container, Box, Typography, Tooltip, CssBaseline } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles'; 
@@ -151,7 +151,7 @@ const StyledDoneRoundedIcon = styled(DoneRoundedIcon)({
                       </Typography>
                     </Tooltip>
                   )}
-                  {!nodeContent.isBulk && <ReqRespIconButton queryId={nodeContent.queryId} nodeId={nodeContent.nodeId} isRequest={true} resultType={nodeContent.resultType}/>}
+                  {!nodeContent.isBulk && <ReqRespIconButton queryId={nodeContent.queryId} nodeId={nodeContent.nodeId} isRequest={true}/>}
                   {!nodeContent.isBulk && nodeContent.state !== PENDING_STATE && <ReqRespIconButton queryId={nodeContent.queryId} nodeId={nodeContent.nodeId} isRequest={false} resultType={nodeContent.resultType}/>}
                   {nodeContent.endTime && (
                     <Tooltip title="Duration" arrow>
@@ -216,7 +216,7 @@ const StyledDoneRoundedIcon = styled(DoneRoundedIcon)({
     }
     
     const handleStopQuery = async () => {
-      cancelQuery();
+      deleteQuery();
       unsubscribe();
       setTreeData({});           
       setExpandedItems([])

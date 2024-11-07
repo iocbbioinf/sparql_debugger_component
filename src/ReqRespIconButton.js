@@ -20,14 +20,15 @@ function ReqRespIconButton({ queryId, nodeId, isRequest, resultType }) {
     const reqResp = isRequest ? "request" : "response";
     const fullUrl = `${baseUrl}/query/${queryId}/call/${callId}/${reqResp}`;
 
-    const actualPreviewLength = resultType === "html" ? 200000 : PREVIEW_LENGTH;
+    const actualPreviewLength = resultType && resultType.toLowerCase() === "html" ? 200000 : PREVIEW_LENGTH;
 
     try {
       const response = await fetch(fullUrl, {
         headers: {
           'Accept-Encoding': 'gzip,deflate',
           'Range': `bytes=0-${actualPreviewLength - 1}`
-        }
+        },
+        'credentials': 'include'
       });
 
       const blob = await response.blob();
@@ -54,7 +55,8 @@ function ReqRespIconButton({ queryId, nodeId, isRequest, resultType }) {
       const response = await fetch(fullUrl, {
         headers: {
           'Accept-Encoding': 'gzip,deflate'
-        }
+        },
+        'credentials': 'include'
       });
       
       const blob = await response.blob();
@@ -90,6 +92,22 @@ function ReqRespIconButton({ queryId, nodeId, isRequest, resultType }) {
   const icon = isRequest ? <InputIcon /> : <OutputIcon />;
   const iconTitle = isRequest ? "Request" : "Response";
 
+  const JSONPrettyWrapper = ({ data, resultType }) => {
+    const isJsonOrXml = (resultType) => {
+        if (resultType && resultType.toLowerCase === "json" || resultType === "xml") {
+          return true;
+        } 
+        return false;
+      }
+
+    return isJsonOrXml(resultType) ? (
+      <JSONPretty id="json-pretty" data={data} theme={JSONPretty.monikai} className="json-pretty"></JSONPretty>
+    ) : (
+      <pre>{data}</pre>
+    );
+  };
+  
+
   return (
     <div>
       <Tooltip title={iconTitle}>
@@ -113,7 +131,7 @@ function ReqRespIconButton({ queryId, nodeId, isRequest, resultType }) {
               Download
             </Button>
 
-            {resultType === "html" ? (
+            {resultType && resultType.toLowerCase() === "html" ? (
             <div             
               style={{
                 flex: 1, // Make the content take up remaining space
@@ -126,8 +144,8 @@ function ReqRespIconButton({ queryId, nodeId, isRequest, resultType }) {
               dangerouslySetInnerHTML={{ __html: fileContent }}
               className="html-preview"              
             />
-          ) : (
-            <JSONPretty id="json-pretty" data={fileContent} theme={JSONPretty.monikai} className="json-pretty"></JSONPretty>
+          ) : ( 
+            <JSONPrettyWrapper data={fileContent} resultType={resultType}/>
           )}
 
           
