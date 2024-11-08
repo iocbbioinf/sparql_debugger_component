@@ -4,7 +4,7 @@
 
 The tool is divided into two main components:
 
-- **Server:** Handles the backend logic, including REST API and SSE messages. You can find it [here](https://github.com/iocbbioinf/sparql_debugger_component).
+- **Server:** Handles the backend logic, including REST API and SSE messages. You can find it [here](https://github.com/iocbbioinf/sparql_debugger_server).
 - **Frontend React Component (this repository):** Renders the service execution tree.
 
 ## Publishing as an NPM Library
